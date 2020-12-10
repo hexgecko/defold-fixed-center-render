@@ -1,0 +1,123 @@
+local LOGICAL_WIDTH = 1024
+local LOGICAL_HEIGHT = 672
+
+local function get_projection_matrix(self, width, height)
+    -- calculate the acpect ratio
+    local acpect_ratio = height / width
+    local logic_width, logical_height
+
+    -- calculate the logical width and height in comparation with the window
+    if acpect_ratio > (LOGICAL_HEIGHT / LOGICAL_WIDTH) then
+        logical_width  = LOGICAL_HEIGHT / acpect_ratio
+        logical_height = LOGICAL_HEIGHT
+    else
+        logical_width  = LOGICAL_WIDTH
+        logical_height = LOGICAL_WIDTH * acpect_ratio
+    end
+
+    -- store the value
+    self.logical_width = logical_width
+    self.logical_height = logical_height
+    
+    -- calculate the coordinates for the window and store them
+    local left = (LOGICAL_WIDTH - logical_width) / 2
+    local bottom = (LOGICAL_HEIGHT - logical_height) / 2
+    local right  = left + logical_width;
+    local top = bottom + logical_height;
+
+    self.rect = {
+        left = left,
+        right = right,
+        top = top,
+        bottom = bottom
+    }
+
+    return vmath.matrix4_orthographic(left, right, bottom, top, -1, 1)
+end
+
+function init(self)
+    self.tile_pred = render.predicate({"tile"})
+    self.gui_pred = render.predicate({"gui"})
+    self.text_pred = render.predicate({"text"})
+    self.particle_pred = render.predicate({"particle"})
+
+    self.clear_color = vmath.vector4(0, 0, 0, 0)
+    self.clear_color.x = sys.get_config("render.clear_color_red", 0)
+    self.clear_color.y = sys.get_config("render.clear_color_green", 0)
+    self.clear_color.z = sys.get_config("render.clear_color_blue", 0)
+    self.clear_color.w = sys.get_config("render.clear_color_alpha", 0)
+
+    self.view = vmath.matrix4()
+    self.projection = get_projection_matrix(self, render.get_width(), render.get_height())
+
+    self.window_resized_subscription = {}
+end
+
+function update(self)
+    render.set_depth_mask(true)
+    render.set_stencil_mask(0xff)
+    render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
+
+    render.set_viewport(0, 0, render.get_window_width(), render.get_window_height())
+    render.set_view(self.view)
+
+    render.set_depth_mask(false)
+    render.disable_state(render.STATE_DEPTH_TEST)
+    render.disable_state(render.STATE_STENCIL_TEST)
+    render.enable_state(render.STATE_BLEND)
+    render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
+    render.disable_state(render.STATE_CULL_FACE)
+
+    render.set_projection(self.projection)
+
+    -- render sprites, tiles and particles
+    render.draw(self.tile_pred)
+    render.draw(self.particle_pred)
+    render.draw_debug3d()
+
+    -- render GUI
+    render.set_view(vmath.matrix4())
+    render.set_projection(vmath.matrix4_orthographic(0, render.get_window_width(), 0, render.get_window_height(), -1, 1))
+
+    render.enable_state(render.STATE_STENCIL_TEST)
+    render.draw(self.gui_pred)
+    render.draw(self.text_pred)
+    render.disable_state(render.STATE_STENCIL_TEST)
+end
+
+function on_message(self, message_id, message, sender)
+    if message_id == hash("clear_color") then
+        self.clear_color = message.color
+        
+    elseif message_id == hash("window_resized") then
+        self.projection = get_projection_matrix(self, message.width, message.height)
+        for sender, boolean in pairs(self.window_resized_subscription) do
+            msg.post(sender, "screen_resized", {
+                width = self.logical_width,
+                height = self.logical_height,
+                left = self.rect.left,
+                right = self.rect.right,
+                top = self.rect.top,
+                bottom = self.rect.bottom
+            })
+        end
+        
+    elseif message_id == hash("subscribe_screen_resized") then
+        self.window_resized_subscription[sender] = true
+        msg.post(sender, "screen_resized", {
+            width = self.logical_width,
+            height = self.logical_height,
+            left = self.rect.left,
+            right = self.rect.right,
+            top = self.rect.top,
+            bottom = self.rect.bottom
+        })
+        
+    elseif message_id == hash("unsubscribe_screen_resized") then
+        self.window_resized_subscription[sender] = nil
+        
+    elseif message_id == hash("set_view_projection") then
+        self.view = message.view
+        self.projection = message.projection
+    end
+end
