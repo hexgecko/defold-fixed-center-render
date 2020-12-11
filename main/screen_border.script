@@ -1,8 +1,26 @@
 go.property("sprite_url", msg.url())
 
+local SET_OFFSET = hash("set_offset")
+local SET_POSITION = hash("set_position")
+local SCREEN_RESIZED = hash("screen_resized")
+
+local function create_decoy()
+	return factory.create("#decoy_factory", vmath.vector3(-1000, -1000, 0))
+end
+
 function init(self)
 	msg.post("@render:", "subscribe_screen_resized")
 	self.sprite_size = go.get(self.sprite_url, "size")
+	self.decoy_list = {
+		north = create_decoy(),
+		north_east = create_decoy(),
+		east = create_decoy(),
+		south_east = create_decoy(),
+		south = create_decoy(),
+		south_west = create_decoy(),
+		west = create_decoy(),
+		north_west = create_decoy()
+	}
 end
 
 function final(self)
@@ -32,11 +50,29 @@ function update(self)
 			local height = self.screen_rect.top - self.screen_rect.bottom
 			go.set_position(pos + vmath.vector3(0, height, 0))
 		end
+
+		for _,decoy in pairs(self.decoy_list) do
+			msg.post(decoy, SET_POSITION, { position = go.get_position() })
+		end
 	end
+end
+
+local function set_offset(self, d, x, y)
+	msg.post(self.decoy_list[d], SET_OFFSET, { offset = vmath.vector3(x, y, 0) })
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("screen_resized") then
 		self.screen_rect = message
+		local w = message.right - message.left
+		local h = message.top - message.bottom
+		set_offset(self, "north", 0, -h)
+		set_offset(self, "north_east", -w, -h)
+		set_offset(self, "east", -w, 0)
+		set_offset(self, "south_east", -w, h)
+		set_offset(self, "south", 0, h)
+		set_offset(self, "south_west", w, h)
+		set_offset(self, "west", w, 0)
+		set_offset(self, "north_west", w, -h)
 	end
 end

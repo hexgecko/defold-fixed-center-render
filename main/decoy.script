@@ -1,0 +1,12 @@
+function init(self)
+	self.offset = vmath.vector3()
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("set_offset") then
+		self.offset = message.offset
+		
+	elseif message_id == hash("set_position") then
+		go.set_position(message.position + self.offset)
+	end
+end
