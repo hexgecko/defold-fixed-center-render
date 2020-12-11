@@ -1,0 +1,34 @@
+local SPEED = 500
+
+function init(self)
+	msg.post(".", "acquire_input_focus")
+end
+
+function update(self, dt)
+	if self.left then
+		go.set_position(go.get_position() + vmath.vector3(-SPEED*dt, 0, 0))
+	elseif self.right then
+		go.set_position(go.get_position() + vmath.vector3(SPEED*dt, 0, 0))
+	end
+
+	if self.up then
+		go.set_position(go.get_position() + vmath.vector3(0, SPEED*dt, 0))
+	elseif self.down then
+		go.set_position(go.get_position() + vmath.vector3(0, -SPEED*dt, 0))
+	end
+end
+
+function on_input(self, action_id, action)
+	if action.pressed then 
+		if action_id == hash("left") then self.left = true end
+		if action_id == hash("right") then self.right = true end
+		if action_id == hash("up") then self.up = true end
+		if action_id == hash("down") then self.down = true end
+		 
+	elseif action.released then
+		if action_id == hash("left") then self.left = false end
+		if action_id == hash("right") then self.right = false end
+		if action_id == hash("up") then self.up = false end
+		if action_id == hash("down") then self.down = false end
+	end
+end

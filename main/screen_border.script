@@ -1,0 +1,42 @@
+go.property("sprite_url", msg.url())
+
+function init(self)
+	msg.post("@render:", "subscribe_screen_resized")
+	self.sprite_size = go.get(self.sprite_url, "size")
+end
+
+function final(self)
+	msg.post("@render:", "unsubscribe_screen_resized")
+end
+
+function update(self)
+	local pos = go.get_position()
+
+	if self.screen_rect ~= nil then
+		-- Check the horizontal border
+		if pos.x > (self.screen_rect.right + self.sprite_size.x / 2) then
+			local width = self.screen_rect.right - self.screen_rect.left
+			go.set_position(pos + vmath.vector3(-width, 0, 0))
+			
+		elseif pos.x < (self.screen_rect.left - self.sprite_size.x / 2) then
+			local width = self.screen_rect.right - self.screen_rect.left
+			go.set_position(pos + vmath.vector3(width, 0, 0))
+		end
+
+		-- Check the verticle border
+		if pos.y > (self.screen_rect.top + self.sprite_size.y / 2) then
+			local height = self.screen_rect.top - self.screen_rect.bottom
+			go.set_position(pos + vmath.vector3(0, -height, 0))
+			
+		elseif pos.y < (self.screen_rect.bottom - self.sprite_size.y / 2) then
+			local height = self.screen_rect.top - self.screen_rect.bottom
+			go.set_position(pos + vmath.vector3(0, height, 0))
+		end
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("screen_resized") then
+		self.screen_rect = message
+	end
+end

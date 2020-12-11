@@ -1,5 +1,5 @@
 [project]
-title = Fixed Center Test
+title = Fixed Center  Render
 
 [bootstrap]
 main_collection = /main/main.collectionc

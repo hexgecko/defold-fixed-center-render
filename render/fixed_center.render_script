@@ -1,6 +1,13 @@
 local LOGICAL_WIDTH = 1024
 local LOGICAL_HEIGHT = 672
 
+local CLEAR_COLOR = hash("clear_color")
+local WINDOW_RESIZED = hash("window_resized")
+local SCREEN_RESIZED = hash("screen_resized")
+local SUBSCRIBE_SCREEN_RESIZED = hash("subscribe_screen_resized")
+local UNSUBSCRIBE_SCREEN_RESIZED = hash("unsubscribe_screen_resized")
+local SET_VIEW_PROJECTION = hash("set_view_projection")
+
 local function get_projection_matrix(self, width, height)
     -- calculate the acpect ratio
     local acpect_ratio = height / width
@@ -14,18 +21,14 @@ local function get_projection_matrix(self, width, height)
         logical_width  = LOGICAL_WIDTH
         logical_height = LOGICAL_WIDTH * acpect_ratio
     end
-
-    -- store the value
-    self.logical_width = logical_width
-    self.logical_height = logical_height
     
     -- calculate the coordinates for the window and store them
     local left = (LOGICAL_WIDTH - logical_width) / 2
     local bottom = (LOGICAL_HEIGHT - logical_height) / 2
     local right  = left + logical_width;
     local top = bottom + logical_height;
-
-    self.rect = {
+    
+    self.screen_rect = {
         left = left,
         right = right,
         top = top,
@@ -86,37 +89,23 @@ function update(self)
 end
 
 function on_message(self, message_id, message, sender)
-    if message_id == hash("clear_color") then
+    if message_id == CLEAR_COLOR then
         self.clear_color = message.color
         
-    elseif message_id == hash("window_resized") then
+    elseif message_id == WINDOW_RESIZED then
         self.projection = get_projection_matrix(self, message.width, message.height)
-        for sender, boolean in pairs(self.window_resized_subscription) do
-            msg.post(sender, "screen_resized", {
-                width = self.logical_width,
-                height = self.logical_height,
-                left = self.rect.left,
-                right = self.rect.right,
-                top = self.rect.top,
-                bottom = self.rect.bottom
-            })
+        for url, boolean in pairs(self.window_resized_subscription) do
+            msg.post(url, SCREEN_RESIZED, self.screen_rect)
         end
         
-    elseif message_id == hash("subscribe_screen_resized") then
+    elseif message_id == SUBSCRIBE_SCREEN_RESIZED then
         self.window_resized_subscription[sender] = true
-        msg.post(sender, "screen_resized", {
-            width = self.logical_width,
-            height = self.logical_height,
-            left = self.rect.left,
-            right = self.rect.right,
-            top = self.rect.top,
-            bottom = self.rect.bottom
-        })
+        msg.post(sender, SCREEN_RESIZED, self.screen_rect)
         
-    elseif message_id == hash("unsubscribe_screen_resized") then
+    elseif message_id == UNSUBSCRIBE_SCREEN_RESIZED then
         self.window_resized_subscription[sender] = nil
         
-    elseif message_id == hash("set_view_projection") then
+    elseif message_id == SET_VIEW_PROJECTION then
         self.view = message.view
         self.projection = message.projection
     end
