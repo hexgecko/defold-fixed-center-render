@@ -1,0 +1,29 @@
+function init(self)
+	msg.post("@render:", "subscribe_screen_resized")
+end
+
+function final(self)
+	msg.post("@render:", "unsubscribe_screen_resized")
+end
+ 
+local function gcd(a, b)
+	if b == 0 then
+		return a
+	end
+	return gcd(b, a%b)
+end
+
+local function reduce_frac(x, y)
+	local d = gcd(math.floor(x + 0.5), math.floor(y + 0.5))
+	return math.floor(x/d + 0.5), math.floor(y/d + 0.5)
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("screen_resized") then
+		local width = message.right - message.left
+		local height = message.top - message.bottom
+		local a, b = reduce_frac(width, height)
+
+		label.set_text("#label", "Acpect Ratio: "..tostring(a)..":"..tostring(b))
+	end
+end
