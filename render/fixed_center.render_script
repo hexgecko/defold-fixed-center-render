@@ -1,5 +1,5 @@
-local LOGICAL_WIDTH = 1024
-local LOGICAL_HEIGHT = 672
+local LOGICAL_WIDTH = sys.get_config("display.width")
+local LOGICAL_HEIGHT = sys.get_config("display.height")
 
 local CLEAR_COLOR = hash("clear_color")
 local WINDOW_RESIZED = hash("window_resized")
@@ -27,6 +27,9 @@ local function get_projection_matrix(self, width, height)
     local bottom = (LOGICAL_HEIGHT - logical_height) / 2
     local right  = left + logical_width;
     local top = bottom + logical_height;
+
+    self.logical_width = logical_width
+    self.logical_height = logical_height
     
     self.screen_rect = {
         left = left,
@@ -94,13 +97,19 @@ function on_message(self, message_id, message, sender)
         
     elseif message_id == WINDOW_RESIZED then
         self.projection = get_projection_matrix(self, message.width, message.height)
-        for url, boolean in pairs(self.window_resized_subscription) do
-            msg.post(url, SCREEN_RESIZED, self.screen_rect)
+        for url,_ in pairs(self.window_resized_subscription) do
+            msg.post(url, SCREEN_RESIZED, {
+                screen_rect = self.screen_rect,
+                inv_proj_view_matrix = vmath.inv(self.projection * self.view)
+            })
         end
         
     elseif message_id == SUBSCRIBE_SCREEN_RESIZED then
         self.window_resized_subscription[sender] = true
-        msg.post(sender, SCREEN_RESIZED, self.screen_rect)
+        msg.post(sender, SCREEN_RESIZED, {
+            screen_rect = self.screen_rect,
+            inv_proj_view_matrix = vmath.inv(self.projection * self.view)
+        })
         
     elseif message_id == UNSUBSCRIBE_SCREEN_RESIZED then
         self.window_resized_subscription[sender] = nil
