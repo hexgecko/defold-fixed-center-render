@@ -63,9 +63,9 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("screen_resized") then
-		self.screen_rect = message.screen_rect
-		local w = message.screen_rect.right - message.screen_rect.left
-		local h = message.screen_rect.top - message.screen_rect.bottom
+		self.screen_rect = message
+		local w = message.right - message.left
+		local h = message.top - message.bottom
 		set_offset(self, "north", 0, -h)
 		set_offset(self, "north_east", -w, -h)
 		set_offset(self, "east", -w, 0)

@@ -3,21 +3,6 @@ scale_along_z: 0
 embedded_instances {
   id: "logo"
   data: "components {\n"
-  "  id: \"movement\"\n"
-  "  component: \"/main/movement.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "}\n"
-  "components {\n"
   "  id: \"screen_border\"\n"
   "  component: \"/main/screen_border.script\"\n"
   "  position {\n"
@@ -35,6 +20,21 @@ embedded_instances {
   "    id: \"sprite_url\"\n"
   "    value: \"#logo\"\n"
   "    type: PROPERTY_TYPE_URL\n"
+  "  }\n"
+  "}\n"
+  "components {\n"
+  "  id: \"movement\"\n"
+  "  component: \"/main/movement.script\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
   "  }\n"
   "}\n"
   "embedded_components {\n"
@@ -195,41 +195,6 @@ embedded_instances {
   "  position {\n"
   "    x: 70.0\n"
   "    y: 616.0\n"
-  "    z: 0.0\n"
-  "  }\n"
-  "  rotation {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
-  "    z: 0.0\n"
-  "    w: 1.0\n"
-  "  }\n"
-  "}\n"
-  ""
-  position {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-  }
-  rotation {
-    x: 0.0
-    y: 0.0
-    z: 0.0
-    w: 1.0
-  }
-  scale3 {
-    x: 1.0
-    y: 1.0
-    z: 1.0
-  }
-}
-embedded_instances {
-  id: "input"
-  data: "components {\n"
-  "  id: \"click\"\n"
-  "  component: \"/main/click_input.script\"\n"
-  "  position {\n"
-  "    x: 0.0\n"
-  "    y: 0.0\n"
   "    z: 0.0\n"
   "  }\n"
   "  rotation {\n"

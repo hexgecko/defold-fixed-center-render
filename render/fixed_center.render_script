@@ -1,12 +1,18 @@
-local LOGICAL_WIDTH = sys.get_config("display.width")
-local LOGICAL_HEIGHT = sys.get_config("display.height")
+local LOGICAL_WIDTH = 1024
+local LOGICAL_HEIGHT = 672
 
 local CLEAR_COLOR = hash("clear_color")
 local WINDOW_RESIZED = hash("window_resized")
+local SET_VIEW_PROJECTION = hash("set_view_projection")
+
 local SCREEN_RESIZED = hash("screen_resized")
 local SUBSCRIBE_SCREEN_RESIZED = hash("subscribe_screen_resized")
 local UNSUBSCRIBE_SCREEN_RESIZED = hash("unsubscribe_screen_resized")
-local SET_VIEW_PROJECTION = hash("set_view_projection")
+
+local PICK_MATRIX_UPDATED = hash("pick_matrix_updated")
+local SUBSCRIBE_PICK_MATRIX = hash("subscribe_pick_matrix")
+local UNSUBSCRIBE_PICK_MATRIX = hash("unsubscribe_pick_matrix")
+
 
 local function get_projection_matrix(self, width, height)
     -- calculate the acpect ratio
@@ -38,7 +44,18 @@ local function get_projection_matrix(self, width, height)
         bottom = bottom
     }
 
-    return vmath.matrix4_orthographic(left, right, bottom, top, -1, 1)
+    return vmath.matrix4_orthographic(left, right, bottom, top, 0, 1)
+end
+
+function get_cube_matrix()
+    local n = vmath.matrix4()
+    n.m00 = 2/render.get_width()
+    n.m03 = -1
+    n.m11 = 2/render.get_height()
+    n.m13 = -1
+    n.m22 = 2
+    n.m23 = -1
+    return n;
 end
 
 function init(self)
@@ -55,8 +72,10 @@ function init(self)
 
     self.view = vmath.matrix4()
     self.projection = get_projection_matrix(self, render.get_width(), render.get_height())
+    self.pick_matrix = vmath.inv(self.projection * self.view) * get_cube_matrix()
 
-    self.window_resized_subscription = {}
+    self.screen_resized_subscription = {}
+    self.pick_matrix_subscription = {}
 end
 
 function update(self)
@@ -97,25 +116,30 @@ function on_message(self, message_id, message, sender)
         
     elseif message_id == WINDOW_RESIZED then
         self.projection = get_projection_matrix(self, message.width, message.height)
-        for url,_ in pairs(self.window_resized_subscription) do
-            msg.post(url, SCREEN_RESIZED, {
-                screen_rect = self.screen_rect,
-                inv_proj_view_matrix = vmath.inv(self.projection * self.view)
-            })
+        self.pick_matrix = vmath.inv(self.projection * self.view) * get_cube_matrix()
+        for url,_ in pairs(self.screen_resized_subscription) do
+            msg.post(url, SCREEN_RESIZED, self.screen_rect)
         end
-        
-    elseif message_id == SUBSCRIBE_SCREEN_RESIZED then
-        self.window_resized_subscription[sender] = true
-        msg.post(sender, SCREEN_RESIZED, {
-            screen_rect = self.screen_rect,
-            inv_proj_view_matrix = vmath.inv(self.projection * self.view)
-        })
-        
-    elseif message_id == UNSUBSCRIBE_SCREEN_RESIZED then
-        self.window_resized_subscription[sender] = nil
+        for url,_ in pairs(self.pick_matrix_subscription) do
+            msg.post(url, PICK_MATRIX_UPDATED, { pick_matrix = self.pick_matrix })
+        end
         
     elseif message_id == SET_VIEW_PROJECTION then
         self.view = message.view
         self.projection = message.projection
+        
+    elseif message_id == SUBSCRIBE_SCREEN_RESIZED then
+        self.screen_resized_subscription[sender] = true
+        msg.post(sender, SCREEN_RESIZED, self.screen_rect)
+        
+    elseif message_id == UNSUBSCRIBE_SCREEN_RESIZED then
+        self.screen_resized_subscription[sender] = nil
+        
+    elseif message_id == SUBSCRIBE_PICK_MATRIX then
+        self.pick_matrix_subscription[sender] = true
+        msg.post(sender, PICK_MATRIX_UPDATED, { pick_matrix = self.pick_matrix })
+        
+    elseif message_id == UNSUBSCRIBE_PICK_MATRIX then
+        self.pick_matrix_subscription[sender] = nil
     end
 end

@@ -20,8 +20,8 @@ end
 
 function on_message(self, message_id, message)
 	if message_id == hash("screen_resized") then
-		local width = message.screen_rect.right - message.screen_rect.left
-		local height = message.screen_rect.top - message.screen_rect.bottom
+		local width = message.right - message.left
+		local height = message.top - message.bottom
 		local a, b = reduce_frac(width, height)
 
 		label.set_text("#label", "Acpect Ratio: "..tostring(a)..":"..tostring(b))

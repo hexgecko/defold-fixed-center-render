@@ -10,8 +10,9 @@ game_binding = /input/game.input_bindingc
 use_accelerometer = 0
 
 [display]
-width = 1024
-height = 672
+width = 512
+height = 336
+high_dpi = 0
 
 [script]
 shared_state = 1
@@ -29,4 +30,14 @@ input_method = HiddenInputField
 gravity_y = -1000.0
 scale = 0.01
 debug = 1
+
+[sprite]
+subpixels = 0
+
+[graphics]
+default_texture_min_filter = linear
+default_texture_mag_filter = linear
+
+[label]
+subpixels = 0
 

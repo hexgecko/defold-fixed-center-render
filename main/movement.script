@@ -1,15 +1,26 @@
-local SPEED = 500
-
 function init(self)
-	msg.post("input#click", "subscribe_click")
+	msg.post(".", "acquire_input_focus")
+	msg.post("@render:", "subscribe_pick_matrix")
 end
 
 function final(self)
-	msg.post("input#click", "unsubscribe_click")
+	msg.post(".", "release_input_focus")
+	msg.post("@render:", "unsubscribe_pick_matrix")
 end
 
-function on_message(self, message_id, message)
-	if message_id == hash("click") then
-		go.set_position(vmath.vector3(message.x, message.y, 0))
+function on_message(self, message_id, message, sender)
+	if message_id == hash("pick_matrix_updated") then
+		self.pick_matrix = message.pick_matrix
+	end
+end
+
+local function mouse_coordinate_to_world(self, action)
+	local p = self.pick_matrix * vmath.vector4(action.x, action.y, 0, 1)
+	return vmath.vector3(p.x, p.y, 0)
+end
+
+function on_input(self, action_id, action)
+	if action_id == hash("click") and action.pressed then
+		go.set_position( mouse_coordinate_to_world(self, action) )
 	end
 end
