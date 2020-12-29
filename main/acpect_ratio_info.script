@@ -1,11 +1,5 @@
-function init(self)
-	msg.post("@render:", "subscribe_screen_resized")
-end
+local fixed_center = require("render.fixed_center")
 
-function final(self)
-	msg.post("@render:", "unsubscribe_screen_resized")
-end
- 
 local function gcd(a, b)
 	if b == 0 then
 		return a
@@ -18,12 +12,22 @@ local function reduce_frac(x, y)
 	return math.floor(x/d + 0.5), math.floor(y/d + 0.5)
 end
 
-function on_message(self, message_id, message)
-	if message_id == hash("screen_resized") then
-		local width = message.right - message.left
-		local height = message.top - message.bottom
-		local a, b = reduce_frac(width, height)
+local function set_label(left, top, right, bottom)
+	local a, b = reduce_frac(right-left, top-bottom)
+	label.set_text("#label", "Acpect Ratio: "..tostring(a)..":"..tostring(b))
+end
 
-		label.set_text("#label", "Acpect Ratio: "..tostring(a)..":"..tostring(b))
+function init(self)
+	set_label(fixed_center.get_rect())
+	msg.post("@render:", "subscribe_frame_resized")
+end
+
+function final(self)
+	msg.post("@render:", "unsubscribe_frame_resized")
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("frame_resized") then
+		set_label(unpack(message))
 	end
 end

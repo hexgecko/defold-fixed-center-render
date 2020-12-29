@@ -1,12 +1,13 @@
-function init(self)
-	self.offset = vmath.vector3()
-end
+go.property("offset", vmath.vector3())
+go.property("frame_size", vmath.vector3())
 
 function on_message(self, message_id, message, sender)
-	if message_id == hash("set_offset") then
-		self.offset = message.offset
-		
-	elseif message_id == hash("set_position") then
-		go.set_position(message.position + self.offset)
+	if message_id == hash("set_position") then
+		local x = self.offset.x * self.frame_size.x
+		local y = self.offset.y * self.frame_size.y
+		go.set_position(message.position + vmath.vector3(x, y, 0))
+
+	elseif message_id == hash("set_frame_size") then
+		self.frame_size = vmath.vector3(message.width, message.height, 0)
 	end
 end

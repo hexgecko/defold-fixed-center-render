@@ -1,0 +1,74 @@
+go.property("sprite_url", msg.url())
+
+local fixed_center = require("render.fixed_center")
+
+local function create_decoy(x, y, width, height)
+	return factory.create("#decoy_factory", nil, nil, {
+		offset = vmath.vector3(x, y, 0),
+		frame_size = vmath.vector3(width, height, 0)
+	})
+end
+
+local function create_decoy_list(left, top, right, bottom)
+	local width = right - left
+	local height = top - bottom
+	return {
+		north = create_decoy(0, 1, width, height),
+		north_east = create_decoy(1, 1, width, height),
+		east = create_decoy(1, 0, width, height),
+		south_east = create_decoy(1, -1, width, height),
+		south = create_decoy(0, -1, width, height),
+		south_west = create_decoy(-1, -1, width, height),
+		west = create_decoy(-1, 0, width, height),
+		north_west = create_decoy(-1, 1, width, height)
+	}
+end
+
+function init(self)
+	self.sprite_size = go.get(self.sprite_url, "size")
+	self.decoy_list = create_decoy_list(fixed_center.get_rect())
+	msg.post("@render:", "subscribe_frame_resized")
+end
+
+function final(self)
+	msg.post("@render:", "unsubscribe_frame_resized")
+end
+
+function update(self)
+	local pos = go.get_position()
+	local left, top, right, bottom = fixed_center.get_rect()
+	
+	-- check the horizontal border
+	if pos.x > (right + self.sprite_size.x / 2) then
+		go.set_position(pos + vmath.vector3(-(right - left), 0, 0))
+		
+	elseif pos.x < (left - self.sprite_size.x / 2) then
+		local width = right - left
+		go.set_position(pos + vmath.vector3(right - left, 0, 0))
+	end
+
+	-- check the verticle border
+	if pos.y > (top + self.sprite_size.y / 2) then
+		go.set_position(pos + vmath.vector3(0, -(top - bottom), 0))
+		
+	elseif pos.y < (bottom - self.sprite_size.y / 2) then
+		go.set_position(pos + vmath.vector3(0, top - bottom, 0))
+	end
+
+	-- send the position to the decoy
+	for _,decoy in pairs(self.decoy_list) do
+		msg.post(decoy, hash("set_position"), { position = go.get_position() })
+	end
+end
+
+function on_message(self, message_id, message)
+	if message_id == hash("frame_resized") then
+		local left, top, right, bottom = fixed_center.get_rect()
+		for _,url in pairs(self.decoy_list) do
+			msg.post(url, "set_frame_size", {
+				width = right - left,
+				height = top - bottom
+			})
+		end
+	end
+end
