@@ -97,7 +97,7 @@ function on_message(self, message_id, message, sender)
         self.projection = vmath.matrix4_orthographic(left, right, bottom, top, -1, 1)
         fixed_center.set_rect(left, top, right, bottom)
         fixed_center.calc_pick_matrix(self.projection, self.view, render.get_width(), render.get_height())
-        for url,_ in pairs(self.frame_resized_subscriber) do
+        for _,url in pairs(self.frame_resized_subscriber) do
             msg.post(url, FRAME_RESIZED, fixed_center.rect)
         end
         
@@ -106,9 +106,9 @@ function on_message(self, message_id, message, sender)
         self.projection = message.projection
 
     elseif message_id == SUBSCRIBE_FRAME_RESIZED then
-        self.frame_resized_subscriber[sender] = true
+        self.frame_resized_subscriber[tostring(sender)] = sender
         
     elseif message_id == UNSUBSCRIBE_FRAME_RESIZED then
-        self.frame_resized_subscriber[sender] = nil
+        self.frame_resized_subscriber[tostring(sender)] = nil
     end
 end
