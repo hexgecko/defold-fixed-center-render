@@ -2,34 +2,44 @@ local fixed_center = require("render.fixed_center")
 
 local LOGICAL_WIDTH = 1024
 local LOGICAL_HEIGHT = 672
+local MAX_ACPECT_RATIO = 3/4
+local MIN_ACPECT_RATIO = 9/16
 
 local CLEAR_COLOR = hash("clear_color")
 local WINDOW_RESIZED = hash("window_resized")
 local SET_VIEW_PROJECTION = hash("set_view_projection")
 
-local FRAME_RESIZED = hash("frame_resized")
-local SUBSCRIBE_FRAME_RESIZED = hash("subscribe_frame_resized")
-local UNSUBSCRIBE_FRAME_RESIZED = hash("unsubscribe_frame_resized")
+local WINDOW_UPDATE = hash("window_update")
 
 local function calc_screen_rect(width, height)
     -- calculate the acpect ratio
     local acpect_ratio = height / width
     local logic_width, logical_height
-
+    
     -- calculate the logical width and height in comparation with the window
     if acpect_ratio > (LOGICAL_HEIGHT / LOGICAL_WIDTH) then
-        logical_width  = LOGICAL_HEIGHT / acpect_ratio
-        logical_height = LOGICAL_HEIGHT
+        if acpect_ratio > MAX_ACPECT_RATIO then
+            logical_width  = LOGICAL_HEIGHT / MAX_ACPECT_RATIO
+            logical_height = LOGICAL_HEIGHT / MAX_ACPECT_RATIO * acpect_ratio
+        else
+            logical_width  = LOGICAL_HEIGHT / acpect_ratio
+            logical_height = LOGICAL_HEIGHT
+        end
     else
-        logical_width  = LOGICAL_WIDTH
-        logical_height = LOGICAL_WIDTH * acpect_ratio
+        if acpect_ratio < MIN_ACPECT_RATIO then
+            logical_width  = LOGICAL_WIDTH * MIN_ACPECT_RATIO / acpect_ratio
+            logical_height = LOGICAL_WIDTH * MIN_ACPECT_RATIO
+        else
+            logical_width  = LOGICAL_WIDTH
+            logical_height = LOGICAL_WIDTH * acpect_ratio
+        end
     end
     
     local left = (LOGICAL_WIDTH - logical_width)/2
     local bottom = (LOGICAL_HEIGHT - logical_height)/2
     local right  = left + logical_width
     local top = bottom + logical_height
-
+    
     return left, top, right, bottom
 end
 
@@ -48,10 +58,11 @@ function init(self)
     self.view = vmath.matrix4()
 
     local left, top, right, bottom = calc_screen_rect(render.get_width(), render.get_height())
+    fixed_center.__set_viewport_rect(left, top, right, bottom)
+    
     self.projection = vmath.matrix4_orthographic(left, right, bottom, top, -1, 1)
-
-    fixed_center.set_rect(left, top, right, bottom)
-    fixed_center.calc_pick_matrix(self.projection, self.view, render.get_width(), render.get_height())
+    
+    fixed_center.__calc_matrix(self.projection, self.view, render.get_width(), render.get_height())
 
     self.frame_resized_subscriber = {}
 end
@@ -60,7 +71,7 @@ function update(self)
     render.set_depth_mask(true)
     render.set_stencil_mask(0xff)
     render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
-
+    
     render.set_viewport(0, 0, render.get_window_width(), render.get_window_height())
     render.set_view(self.view)
 
@@ -95,10 +106,43 @@ function on_message(self, message_id, message, sender)
     elseif message_id == WINDOW_RESIZED then
         local left, top, right, bottom = calc_screen_rect(message.width, message.height)
         self.projection = vmath.matrix4_orthographic(left, right, bottom, top, -1, 1)
-        fixed_center.set_rect(left, top, right, bottom)
-        fixed_center.calc_pick_matrix(self.projection, self.view, render.get_width(), render.get_height())
-        for _,url in pairs(self.frame_resized_subscriber) do
-            msg.post(url, FRAME_RESIZED, fixed_center.rect)
+        fixed_center.__calc_matrix(self.projection, self.view, render.get_width(), render.get_height())
+        
+        local bar_width = 0
+        local bar_height = 0
+        
+        if left < 0 then
+            bar_width = -left
+            left = 0
+            right = LOGICAL_WIDTH
+        end
+
+        if bottom < 0 then
+            bar_height = -bottom
+            bottom = 0
+            top = LOGICAL_HEIGHT
+        end
+
+        fixed_center.__set_viewport_rect(left, top, right, bottom)
+
+        local l,t,r,b = fixed_center.get_viewport_rect()
+        for _,url in pairs(fixed_center.__window_listener_list) do
+            msg.post(url, WINDOW_UPDATE, {
+                window = {
+                    width = render.get_window_width(),
+                    hieght = render.get_window_height()
+                },
+                viewport = {
+                    left = l,
+                    top = t,
+                    right = r,
+                    bottom = b
+                },
+                bar = {
+                    width = bar_width,
+                    height = bar_height
+                }
+            })
         end
         
     elseif message_id == SET_VIEW_PROJECTION then

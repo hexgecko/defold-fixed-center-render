@@ -25,18 +25,20 @@ local function create_decoy_list(left, top, right, bottom)
 end
 
 function init(self)
+	self.url = msg.url();
+	fixed_center.add_window_listener(self.url)
+	
 	self.sprite_size = go.get(self.sprite_url, "size")
-	self.decoy_list = create_decoy_list(fixed_center.get_rect())
-	msg.post("@render:", "subscribe_frame_resized")
+	self.decoy_list = create_decoy_list(fixed_center.get_viewport_rect())
 end
 
 function final(self)
-	msg.post("@render:", "unsubscribe_frame_resized")
+	fixed_center.remove_window_listener(self.url)
 end
 
 function update(self)
 	local pos = go.get_position()
-	local left, top, right, bottom = fixed_center.get_rect()
+	local left, top, right, bottom = fixed_center.get_viewport_rect()
 	
 	-- check the horizontal border
 	if pos.x > (right + self.sprite_size.x / 2) then
@@ -62,8 +64,19 @@ function update(self)
 end
 
 function on_message(self, message_id, message)
-	if message_id == hash("frame_resized") then
-		local left, top, right, bottom = fixed_center.get_rect()
+	if message_id == hash("window_update") then
+		local left, top, right, bottom = fixed_center.get_viewport_rect()
+
+		if left < 0 then
+			left = 0
+			right = 1024
+		end
+
+		if bottom < 0 then
+			bottom = 0
+			top = 672
+		end
+		
 		for _,url in pairs(self.decoy_list) do
 			msg.post(url, "set_frame_size", {
 				width = right - left,

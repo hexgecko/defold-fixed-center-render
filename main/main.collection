@@ -95,7 +95,22 @@ embedded_instances {
 }
 embedded_instances {
   id: "background"
-  data: "embedded_components {\n"
+  data: "components {\n"
+  "  id: \"curtain\"\n"
+  "  component: \"/main/side_bars.gui\"\n"
+  "  position {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "  }\n"
+  "  rotation {\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
+  "    z: 0.0\n"
+  "    w: 1.0\n"
+  "  }\n"
+  "}\n"
+  "embedded_components {\n"
   "  id: \"background\"\n"
   "  type: \"sprite\"\n"
   "  data: \"tile_set: \\\"/main/main.atlas\\\"\\n"
@@ -193,8 +208,8 @@ embedded_instances {
   "material: \\\"/builtins/fonts/label.material\\\"\\n"
   "\"\n"
   "  position {\n"
-  "    x: 70.0\n"
-  "    y: 616.0\n"
+  "    x: 0.0\n"
+  "    y: 0.0\n"
   "    z: 0.0\n"
   "  }\n"
   "  rotation {\n"
@@ -206,8 +221,8 @@ embedded_instances {
   "}\n"
   ""
   position {
-    x: 0.0
-    y: 0.0
+    x: 70.0
+    y: 616.0
     z: 0.0
   }
   rotation {

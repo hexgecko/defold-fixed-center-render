@@ -12,13 +12,13 @@ local function reduce_frac(x, y)
 	return math.floor(x/d + 0.5), math.floor(y/d + 0.5)
 end
 
-local function set_label(left, top, right, bottom)
+local function set_label(left, top, right, bottom)	
 	local a, b = reduce_frac(right-left, top-bottom)
 	label.set_text("#label", "Acpect Ratio: "..tostring(a)..":"..tostring(b))
 end
 
 function init(self)
-	set_label(fixed_center.get_rect())
+	set_label(fixed_center.get_viewport_rect())
 	msg.post("@render:", "subscribe_frame_resized")
 end
 
@@ -28,6 +28,6 @@ end
 
 function on_message(self, message_id, message)
 	if message_id == hash("frame_resized") then
-		set_label(unpack(message))
+		set_label(fixed_center.get_rect())
 	end
 end

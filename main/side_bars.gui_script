@@ -1,0 +1,46 @@
+local fixed_center = require("render.fixed_center")
+
+function init(self)
+	self.url = msg.url()
+	fixed_center.add_window_listener(self.url)
+
+	gui.set_enabled(gui.get_node("left"), false)
+	gui.set_enabled(gui.get_node("right"), false)
+	gui.set_enabled(gui.get_node("top"), false)
+	gui.set_enabled(gui.get_node("bottom"), false)
+end
+
+function final(self)
+	fixed_center.remove_window_listener(self.url)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("window_update") then
+		local left_node = gui.get_node("left")
+		local right_node = gui.get_node("right")
+		local top_node = gui.get_node("top")
+		local bottom_node = gui.get_node("bottom")
+		
+		if message.bar.width > 0 then
+			local width = fixed_center.world_to_gui(message.bar.width, 0)
+			gui.set_enabled(left_node, true)
+			gui.set_enabled(right_node, true)
+			gui.set_scale(left_node, vmath.vector3(width/100, 1, 1))
+			gui.set_scale(right_node, vmath.vector3(width/100, 1, 1))
+		else
+			gui.set_enabled(left_node, false)
+			gui.set_enabled(right_node, false)			
+		end
+		
+		if message.bar.height > 0 then
+			local _, height = fixed_center.world_to_gui(0, message.bar.height)
+			gui.set_enabled(top_node, true)
+			gui.set_enabled(bottom_node, true)
+			gui.set_scale(top_node, vmath.vector3(1, height/100, 1))
+			gui.set_scale(bottom_node, vmath.vector3(1, height/100, 1))
+		else
+			gui.set_enabled(top_node, false)
+			gui.set_enabled(bottom_node, false)
+		end
+	end
+end
