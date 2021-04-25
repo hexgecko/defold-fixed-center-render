@@ -2,14 +2,15 @@ local M = {
 	__pick_matrix = vmath.matrix4(),
 	__world_to_gui_matrix = vmath.matrix4(),
 	__viewport_rect,
+	__window_size,
 	__window_listener_list = {}
 }
 
 function M.get_viewport_rect()
-	return unpack(M.__screen_rect)
+	return unpack(M.__viewport_rect)
 end
 
-function M.screen_to_world(x, y)
+function M.window_to_world(x, y)
 	local p = M.__pick_matrix * vmath.vector4(x, y, 0, 1)
 	return p.x, p.y
 end
@@ -21,14 +22,46 @@ end
 
 function M.add_window_listener(url)
 	M.__window_listener_list[tostring(url)] = url
+
+	local left, top, right, bottom = M.get_viewport_rect()
+	local bar_width, bar_height = 0, 0
+	if left < 0 then
+		bar_width = -left
+		left = 0
+		right = LOGICAL_WIDTH
+	end
+	if bottom < 0 then
+		bar_height = -bottom
+		bottom = 0
+		top = LOGICAL_HEIGHT
+	end
+
+	local window_width, window_height = unpack(M.__window_size)
+	msg.post(url, hash("window_update"), {
+		window = {
+			width = window_width,
+			hieght = window_height
+		},
+		viewport = {
+			left = left,
+			top = top,
+			right = right,
+			bottom = bottom
+		},
+		bar = {
+			width = bar_width,
+			height = bar_height
+		}
+	})
 end
 
 function M.remove_window_listener(url)
 	M.__window_listener_list[tostring(url)] = nil
 end
 
-function M.__set_viewport_rect(left, top, right, bottom)
-	M.__screen_rect = { left, top, right, bottom }
+function M.__set_viewport_rect_and_window_size(left, top, right, bottom, width, heitgh)
+	M.__viewport_rect = { left, top, right, bottom }
+	M.__window_size = { width, height }
 end
 
 function M.__calc_matrix(proj, view, width, height)

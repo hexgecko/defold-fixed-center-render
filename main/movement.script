@@ -10,7 +10,7 @@ end
 
 function on_input(self, action_id, action)
 	if action_id == hash("click") and action.pressed then
-		local x, y = fixed_center.frame_to_world(action.x, action.y)
+		local x, y = fixed_center.window_to_world(action.x, action.y)
 		go.set_position(vmath.vector3(x, y, 0))
 	end
 end

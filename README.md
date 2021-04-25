@@ -21,9 +21,9 @@ Return the coordinates for the screen edges in world space. This can be negative
 local left, top, right, bottom = fixed_center.get_viewport_rect()
 ```
 
-### fixed_center.screen_to_world(x, y)
+### fixed_center.window_to_world(x, y)
 
-Transform a position from the gui space to world space. This can be used to translate mouse position to a world position.
+Transform a position from the window space to world space. This can be used to translate mouse position to a world position.
 
 local x, y = fixed_center.gui_to_world(message.x, message.y)
 

@@ -96,7 +96,7 @@ embedded_instances {
 embedded_instances {
   id: "background"
   data: "components {\n"
-  "  id: \"curtain\"\n"
+  "  id: \"bar\"\n"
   "  component: \"/main/side_bars.gui\"\n"
   "  position {\n"
   "    x: 0.0\n"

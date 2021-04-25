@@ -3,11 +3,6 @@ local fixed_center = require("render.fixed_center")
 function init(self)
 	self.url = msg.url()
 	fixed_center.add_window_listener(self.url)
-
-	gui.set_enabled(gui.get_node("left"), false)
-	gui.set_enabled(gui.get_node("right"), false)
-	gui.set_enabled(gui.get_node("top"), false)
-	gui.set_enabled(gui.get_node("bottom"), false)
 end
 
 function final(self)
