@@ -28,7 +28,6 @@ function on_message(self, message_id, message, sender)
 		
 		if message.bar.width > 0 then
 			local width = fixed_center.world_to_gui(message.bar.width, 0)
-			print("bar_width: "..message.bar.width.." width: "..width)
 			gui.set_enabled(left_node, true)
 			gui.set_enabled(right_node, true)
 			gui.set_scale(left_node, vmath.vector3(width/200, 1, 1))
