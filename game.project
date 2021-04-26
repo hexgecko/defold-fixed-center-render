@@ -12,7 +12,6 @@ use_accelerometer = 0
 [display]
 width = 682
 height = 448
-high_dpi = 0
 
 [script]
 shared_state = 1

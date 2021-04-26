@@ -18,16 +18,16 @@ local function set_label(left, top, right, bottom)
 end
 
 function init(self)
-	set_label(fixed_center.get_viewport_rect())
-	msg.post("@render:", "subscribe_frame_resized")
+	self.url = msg.url()
+	fixed_center.add_window_listener(self.url)
 end
 
 function final(self)
-	msg.post("@render:", "unsubscribe_frame_resized")
+	fixed_center.remove_window_listener(self.url)
 end
 
 function on_message(self, message_id, message)
-	if message_id == hash("frame_resized") then
-		set_label(fixed_center.get_rect())
+	if message_id == hash("window_update") then
+		set_label(fixed_center.get_viewport_rect())
 	end
 end

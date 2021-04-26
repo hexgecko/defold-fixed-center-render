@@ -10,7 +10,7 @@ This is a render for the Defold game engine including support functions. It supp
 To use feature from the Fixed Center you need to require the fixed_center module:
 
 ```lua
-local fixed_center = require(“render.fixed_center”)
+local fixed_center = require("render.fixed_center")
 ```
 
 ### fixed_center.get_viewport_rect()

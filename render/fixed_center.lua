@@ -17,7 +17,7 @@ end
 
 function M.world_to_gui(x, y)
 	local p = M.__world_to_gui_matrix * vmath.vector4(x, y, 0, 1)
-	return p.x/2, p.y/2
+	return p.x, p.y
 end
 
 function M.add_window_listener(url)
@@ -73,7 +73,7 @@ function M.__calc_matrix(proj, view, width, height)
 	n.m22 = 2
 	n.m23 = -1
 	M.__pick_matrix = vmath.inv(proj * view) * n
-	M.__world_to_gui_matrix = vmath.inv(vmath.inv(proj) * n)
+	M.__world_to_gui_matrix = vmath.inv(M.__pick_matrix)
 end
 
 return M
