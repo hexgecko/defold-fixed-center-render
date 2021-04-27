@@ -3,7 +3,23 @@
 
 ## Description
 
-This is a render for the Defold game engine including support functions. It supports different screen aspect ratios where the default is 31:21. If it’s wider up to 16:9 (HD) or narrower down to 4:3 (iPad) the edges will be clipped. If the aspect ratio is bigger or smaller a black bar is shown at the sides. You can use a gui rect to hide the sprite behind the bar as shown in the example.
+This is a render for the Defold game engine including support functions. It supports different screen aspect ratios where the default is 32:21. If it’s wider up to 16:9 (HD) or narrower down to 4:3 (iPad) the edges will be clipped. If the aspect ratio is bigger or smaller a black bar is shown at the sides. You can use a gui rect to hide the sprite behind the bar as shown in the example.
+
+## Constans
+
+The default logical size for the 32:21 acpect ratio is 1024x671. You can change it by edit the following in _fixed_center.render_script_:
+
+```lua
+local LOGICAL_WIDTH = 1024
+local LOGICAL_HEIGHT = 672
+```
+
+You can also update the the min and max acepect ratio before the side bars is shown by changing:
+
+```lua
+local MAX_ACPECT_RATIO = 3/4
+local MIN_ACPECT_RATIO = 9/16
+```
 
 ## Functions
 
