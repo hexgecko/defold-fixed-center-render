@@ -163,12 +163,6 @@ function on_message(self, message_id, message, sender)
         
     elseif message_id == SET_VIEW_PROJECTION then
         self.view = message.view
-        self.projection = message.projection
-
-    elseif message_id == SUBSCRIBE_FRAME_RESIZED then
-        self.frame_resized_subscriber[tostring(sender)] = sender
-        
-    elseif message_id == UNSUBSCRIBE_FRAME_RESIZED then
-        self.frame_resized_subscriber[tostring(sender)] = nil
+        fixed_center.__calc_matrix(self.projection, self.view, render.get_width(), render.get_height())
     end
 end
