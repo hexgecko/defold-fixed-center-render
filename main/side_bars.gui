@@ -25,7 +25,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 100.0
+    x: 0.5
     y: 448.0
     z: 0.0
     w: 1.0
@@ -79,7 +79,7 @@ nodes {
     w: 1.0
   }
   size {
-    x: 100.0
+    x: 0.5
     y: 448.0
     z: 0.0
     w: 1.0
@@ -134,7 +134,7 @@ nodes {
   }
   size {
     x: 682.0
-    y: 100.0
+    y: 0.5
     z: 0.0
     w: 1.0
   }
@@ -188,7 +188,7 @@ nodes {
   }
   size {
     x: 682.0
-    y: 100.0
+    y: 0.5
     z: 0.0
     w: 1.0
   }
@@ -256,10 +256,10 @@ nodes {
   blend_mode: BLEND_MODE_ALPHA
   texture: ""
   id: "box"
-  xanchor: XANCHOR_NONE
-  yanchor: YANCHOR_NONE
+  xanchor: XANCHOR_LEFT
+  yanchor: YANCHOR_BOTTOM
   pivot: PIVOT_CENTER
-  adjust_mode: ADJUST_MODE_STRETCH
+  adjust_mode: ADJUST_MODE_FIT
   layer: ""
   inherit_alpha: true
   slice9 {

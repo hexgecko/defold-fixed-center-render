@@ -37,19 +37,19 @@ Return the coordinates for the screen edges in world space. This can be negative
 local left, top, right, bottom = fixed_center.get_viewport_rect()
 ```
 
-### fixed_center.window_to_world(x, y)
+### fixed_center.screen_to_world(x, y)
 
 Transform a position from the window space to world space. This can be used to translate mouse position to a world position.
 
-local x, y = fixed_center.gui_to_world(message.x, message.y)
+local x, y = fixed_center.screen_to_world(message.x, message.y)
 
 
-### fixed_center.world_to_gui(x, y)
+### fixed_center.world_to_screen(x, y)
 
 Transform a position from world space to gui space.
 
 ```lua
-local left, bottom = fixed_center.gui_to_world(message.bar.width, message.bar.height)
+local left, bottom = fixed_center.world_to_screen(message.bar.width, message.bar.height)
 ```
 
 ## Window Update Listener
